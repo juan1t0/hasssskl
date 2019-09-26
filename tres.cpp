@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#incliude <algorithms>
+#include <algorithm>
 
 using namespace std;
 
@@ -79,39 +79,74 @@ vector<Token> analizadorLexico(char * line){
 	}
 	return ttokens;
 }
-pair<int,int> getCom(vector<Token> &V){
-	pair<int,int> expr = getExp(V);
-	pair<int,int> igul = getIgu(V);
-	if( expr.first != -1 )
-		return expr;
-	if( igul.first != -1 )
-		return igualdad;
-	return expr;
+pair<int,int> getExp1(vector<Token> &V,int i, int f){
+    int it=i;
+    while(V[it].type != 'O' && it<=f) it++;
+    if(it==f) return make_pair(-1,-1);
+    pair<int,int> exprl = getExp(V,i,it-1);
+    pair<int,int> exprr = getExp(V,it+1,f);
+    if (exprl.first != -1 && exprr.first != -1){
+        return make_pair(i,f);
+    }
+    return make_pair(-1,-1);
+}
+pair<int,int> getExp2(vector<Token> &V,int i, int f){
+    if(*(V[i].pal) == '(' && *(V[f].pal) == ')'){
+        pair<int,int> expr = getExp(V,i+1,f-1);
+        if(expr.first != -1)
+    		return make_pair(i,f);
+    }
+    return make_pair(-1,-1);
+}
+pair<int,int> getExp3(vector<Token> &V,int i, int f){
+    if(i == f && (V[i].type == 'E' || V[i].type == 'V')){
+        return make_pair(i,i);
+    }
+    return make_pair(-1,-1);
 }
 pair<int,int> getExp(vector<Token> &V,int i, int f){
 	pair<int,int> expr1 = getExp1(V,i,f);
-	pair<int,int> expr2 = getExp2(V,i,f);
-	pair<int,int> expr3 = getExp3(V,i,f);	
 	if( expr1.first != -1 )
-		return expr;
+		return expr1;
+	pair<int,int> expr2 = getExp2(V,i,f);
 	if( expr2.first != -1 )
-		return expr;
-	if( expr3.first != -1 )
-		return expr;
+		return expr2;
+	pair<int,int> expr3 = getExp3(V,i,f);
+    if( expr3.first != -1 )
+		return expr3;
 	return expr1;
 }
-pair<int,int> getIgu(vector<Token> &V){
-	pair<int,int> expr = getExp(V,i,f);
-	if(V[0].type == 'V' && V[1] == '=' && (expr.first != -1)){
-		return make_pair(V[0].index,expr.second);
+pair<int,int> getIgu(vector<Token> &V,int i,int f){
+	if(V[i].type == 'V' && *(V[i+1].pal) == '='){
+        pair<int,int> expr = getExp(V,i+2,f);
+        if(expr.first != -1)
+    		return make_pair(i,expr.second);
 	}
+    return make_pair(-1,-1);
+}
+pair<int,int> getCom(vector<Token> &V){
+    int mf = V.size()-1;
+	pair<int,int> expr = getExp(V,0,mf);
+	if( expr.first != -1 )
+		return expr;
+    pair<int,int> igul = getIgu(V,0,mf);
+	if( igul.first != -1 )
+		return igul;
+	return igul;
 }
 int main(int argc, char *argv[]) {
 	char a[]="> perrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrro = 3 *pe2ce;";
 	vector<Token> t = analizadorLexico(a);
 	cout<<t.size()<<" sis"<<endl;
-	for(int i=0;i<t.size();++i){
+/*	for(int i=0;i<t.size();++i){
 		cout<< t[i].idex <<" | "<< t[i].pal <<" | "<< t[i].type <<endl;
-	}
+	}*/
+    pair<int,int> r = getCom(t);
+    if(r.first == -1){
+        cout<<"Nop"<<endl;
+    }else {
+        cout<<"SIU"<<endl;
+    }
+
 	return 0;
 }
