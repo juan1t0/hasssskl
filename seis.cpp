@@ -8,7 +8,7 @@
 #include <sstream>
 #include <queue>
 #include <stack>
-#include <map>
+#include <algorithm>
 
 #define contex pair<string,string>
 
@@ -204,8 +204,8 @@ struct Gramatica{
 	Gramatica(){}
     ~Gramatica(){}
 
-    Produccion* getProduction(int pos){
-        return &production[pos];
+    Produccion* get_Production(int pos){
+        return production[pos];
     }
     void insertProduction(Produccion* xtr, int pos){
         production.insert(production.begin() + pos, xtr);
@@ -221,47 +221,63 @@ public:
     Estado_Compilador(){}
     ~Estado_Compilador(){}
 };
-queue <Estado_Compilador*> chart;
+//queue <Estado_Compilador*> chart;
+vector<Estado_Compilador *> chart;
 
 class Accion {
 public:
-    virtual bool sePuedeAplicar(EstadoCompilador *estado) = 0;
-    virtual void aplica(EstadoCompilador *estado, queue<EstadoCompilador*> &chart) = 0;
-}
+    virtual bool sePuedeAplicar(Estado_Compilador *estado) = 0;
+    virtual void aplica(Estado_Compilador *estado) =0 ;//, queue<Estado_Compilador*> &chart) = 0;
+};
 class Dummy : public Accion{
 public:
-    bool sePuedeAplicar(EstadoCompilador *stte){return 1;}
-    void aplica(EstadoCompilador *stte, queue<EstadoCompilador*> &chrt){
-		Produccion* fist = stte->gramarSource->getProuction(0);
-		vector<string>* v = new vector<string>;
-		v.push_back(fist->name);
-		Produccion* temp = new SimpleProduc("S",*v);
+    bool sePuedeAplicar(Estado_Compilador *stte){return true;}
+    void aplica(Estado_Compilador *stte){//, queue<Estado_Compilador*> &chrt){
+		Produccion* fist = stte->gramarSource->get_Production(0);
+		vector<string> v;
+		v.push_back(fist->nombre);
+        string nn = "S";
+		Produccion* temp = new SimpleProduc(nn,v);
 		stte->PosAsterisco = 0;
 		stte->PosPalabra = 0;
 		stte->root = 0;
 		stte->producRef = temp;
+        stte->gramarSource->production.insert(stte->gramarSource->production.begin(),temp);
     }
     Dummy(Estado_Compilador*state){
         if (sePuedeAplicar(state)){
-            aplica(state, chart);
+            aplica(state);
         }
     }
     ~Dummy(){}
 };
 class Expandir : public Accion {
-	bool sePuedeAplicar(EstadoCompilador *stte){
-		//buscar si el siguiente token tiene algun estado en chart
-		//si tiene 0
-		//si no tiene verificar si es terminal = 0
-		//sino = 1
+	bool sePuedeAplicar(Estado_Compilador *stte){
+//        if (stte->producRef->isTerminal) return false;
+        int i;
+        for(i = 0; i < chart.size(); ++i){
+            if(chart[i]->producRef->nombre == stte->producRef->nombre) return false;
+        }
+        return true;
 	}
-    void aplica(EstadoCompilador *stte, queue<EstadoCompilador*> &chrt){
-		//buscar todas las producciónes que tienen como name el token
-		//apilarlos en chart
+    void aplica(Estado_Compilador *stte){//, queue<Estado_Compilador*> &chrt){
+        size_t sizz = stte->gramarSource->production.size();
+        string nn = stte->producRef->der->at(stte->PosAsterisco);
+        for(size_t i = 0; i< sizz; ++i){
+            if(stte->gramarSource->production[i]->nombre == nn){
+                Estado_Compilador * EC = new Estado_Compilador;
+                EC->producRef = stte->gramarSource->production[i];
+                EC->gramarSource = stte->gramarSource;
+                EC->PosAsterisco = 0;
+                EC->PosPalabra = 0;
+                EC->root = stte;
+                chart.push_back(EC);
+            }
+        }
 	}
     Expandir(Estado_Compilador*state){
         if (sePuedeAplicar(state)){
-            aplica(state, chart);
+            aplica(state);
         }
     }
     ~Expandir(){}
@@ -280,7 +296,6 @@ int main(int argc, char *argv[]) {
 	grammar.read("Det[gen=?m] := 'el'");
 	grammar.read("Suj[gen=?m] := 'nino'");
 	grammar.read("Suj[gen=?f] := 'nina'");
-
 	vector<vector<string>> producciones = grammar.getProduction("Sus");
 	printMatrix(producciones);
 	producciones = grammar.getProduction("Det");
@@ -289,10 +304,7 @@ int main(int argc, char *argv[]) {
 	printMatrix(producciones);
 	grammar.printGrammar();
 	*/
-		
-	
-	
-	
+
 	return 0;
 }
 
