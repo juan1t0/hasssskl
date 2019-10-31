@@ -72,7 +72,7 @@ public:
 };
 
 struct Gramatica{
-	string estadoInicial = "E";
+	string estadoInicial;
 	vector<Produccion*> production;
 	set<string> terminales;
 	set<string> noterminales;
@@ -202,10 +202,69 @@ struct Gramatica{
 		}
 	}
 	Gramatica(){}
-};
+    ~Gramatica(){}
 
+    Produccion* getProduction(int pos){
+        return &production[pos];
+    }
+    void insertProduction(Produccion* xtr, int pos){
+        production.insert(production.begin() + pos, xtr);
+    }
+};
 class Estado_Compilador{
-	Produccion
+public:
+	Gramatica *gramarSource;
+	Produccion *producRef;
+    int PosAsterisco;
+    int PosPalabra;
+    Estado_Compilador *root;
+    Estado_Compilador(){}
+    ~Estado_Compilador(){}
+};
+queue <Estado_Compilador*> chart;
+
+class Accion {
+public:
+    virtual bool sePuedeAplicar(EstadoCompilador *estado) = 0;
+    virtual void aplica(EstadoCompilador *estado, queue<EstadoCompilador*> &chart) = 0;
+}
+class Dummy : public Accion{
+public:
+    bool sePuedeAplicar(EstadoCompilador *stte){return 1;}
+    void aplica(EstadoCompilador *stte, queue<EstadoCompilador*> &chrt){
+		Produccion* fist = stte->gramarSource->getProuction(0);
+		vector<string>* v = new vector<string>;
+		v.push_back(fist->name);
+		Produccion* temp = new SimpleProduc("S",*v);
+		stte->PosAsterisco = 0;
+		stte->PosPalabra = 0;
+		stte->root = 0;
+		stte->producRef = temp;
+    }
+    Dummy(Estado_Compilador*state){
+        if (sePuedeAplicar(state)){
+            aplica(state, chart);
+        }
+    }
+    ~Dummy(){}
+};
+class Expandir : public Accion {
+	bool sePuedeAplicar(EstadoCompilador *stte){
+		//buscar si el siguiente token tiene algun estado en chart
+		//si tiene 0
+		//si no tiene verificar si es terminal = 0
+		//sino = 1
+	}
+    void aplica(EstadoCompilador *stte, queue<EstadoCompilador*> &chrt){
+		//buscar todas las producciónes que tienen como name el token
+		//apilarlos en chart
+	}
+    Expandir(Estado_Compilador*state){
+        if (sePuedeAplicar(state)){
+            aplica(state, chart);
+        }
+    }
+    ~Expandir(){}
 };
 
 int main(int argc, char *argv[]) {
@@ -230,10 +289,7 @@ int main(int argc, char *argv[]) {
 	printMatrix(producciones);
 	grammar.printGrammar();
 	*/
-	
-	grmmar.dummy();
-	grammar.printGrammar();
-	
+		
 	
 	
 	
