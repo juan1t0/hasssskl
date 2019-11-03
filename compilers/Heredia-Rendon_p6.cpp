@@ -26,7 +26,7 @@ void DeteleFromString(string &s, char d){
 }
 
 template<class T>
-void printMatrix(vector<vector<T>> &mat){
+void printMatrix(vector<vector<T> > &mat){
 	for(size_t i = 0; i < mat.size(); ++i){
 		for(size_t j = 0; j < mat[i].size(); ++j){
 			cout << mat[i][j] << '\t';
@@ -38,7 +38,7 @@ void printMatrix(vector<vector<T>> &mat){
 class Produccion{
 public:
 	string nombre;
-	vector<string> *der=0;
+	vector<string> *der;
 public:
 	Produccion(){}
 	Produccion(string &s): nombre(s){}
@@ -52,8 +52,8 @@ public:
 
 class ContexProduc : public Produccion{
 public:
-	vector<contex>* contexto=0;
-	vector<Produccion>* derP=0;
+	vector<contex>* contexto;
+	vector<Produccion>* derP;
 	ContexProduc(Produccion p):Produccion(p.nombre,*(p.der)){
 		cout<<"aqa"<<endl;
 		contexto = 0;
@@ -148,8 +148,8 @@ struct Gramatica{
 		}
 		return terminals;
 	}
-	vector<vector<string>> getProduction(string izq){
-		vector<vector<string>> result;
+	vector<vector<string> > getProduction(string izq){
+		vector<vector<string> > result;
 		for(size_t i = 0; i < production.size(); ++i){
 			if(production[i]->nombre == izq){
 				if(production[i]->der){
@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) {
 	grammar.read("Det[gen=?m] := 'el'");
 	grammar.read("Suj[gen=?m] := 'nino'");
 	grammar.read("Suj[gen=?f] := 'nina'");
-	vector<vector<string>> producciones = grammar.getProduction("Sus");
+	vector<vector<string> > producciones = grammar.getProduction("Sus");
 	printMatrix(producciones);
 	producciones = grammar.getProduction("Det");
 	printMatrix(producciones);
