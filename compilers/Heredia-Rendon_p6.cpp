@@ -35,6 +35,15 @@ void printMatrix(vector<vector<T> > &mat){
 	}
 }
 
+struct Token{
+	char *pal;
+	char type;
+	int idex;
+	
+	Token(){}
+	~Token(){}
+};
+
 class Produccion{
 public:
 	string nombre;
@@ -203,6 +212,9 @@ struct Gramatica{
 			cout<<endl;
 		}
 	}
+	bool isTerminal(string token){///comprobar si es terminal
+
+	}
 	Gramatica(){}
     ~Gramatica(){}
 
@@ -220,7 +232,9 @@ public:
     int PosAsterisco;
     int PosPalabra;
     Estado_Compilador *root;
-    Estado_Compilador(){}
+	vector<string> *tokens;
+    Estado_Compilador(Produccion* PR, int PA, int PP, Estado_Compilador* R):producRef(PR),PosAsterisco(PA), PosPalabra(PP), root(R){}
+	Estado_Compilador(){}
     ~Estado_Compilador(){}
 };
 //queue <Estado_Compilador*> chart;
@@ -268,12 +282,11 @@ class Expandir : public Accion {
         string nn = stte->producRef->der->at(stte->PosAsterisco);
         for(size_t i = 0; i< sizz; ++i){
             if(gramarSource->production[i]->nombre == nn){
-                Estado_Compilador * EC = new Estado_Compilador;
-                EC->producRef = gramarSource->production[i];
-                //EC->gramarSource = stte->gramarSource;
+                Estado_Compilador * EC = new Estado_Compilador(gramarSource->production[i], 0, 0, stte);
+                /*EC->producRef = gramarSource->production[i];
                 EC->PosAsterisco = 0;
                 EC->PosPalabra = 0;
-                EC->root = stte;
+                EC->root = stte;*/
                 chart.push_back(EC);
             }
         }
@@ -289,9 +302,15 @@ class Expandir : public Accion {
 class Aceptar : public Accion {
 	bool sePuedeAplicar(Estado_Compilador *stte){
 		///si el astericso esta a la izquierda de un terminal
-		///verificamos con ayuda de unificar si es el mismo elemento indicado con pos palabra del estado compilador
+		vector<string> tokens = *(stte->tokens);
+		if(gramarSource->isTerminal(tokens[stte->PosAsterisco])){//faltaria implementar isTerminal
+			///verificamos con ayuda de unificar si es el mismo elemento indicado con pos palabra del estado compilador
+		}
 	}
 	void aplica(Estado_Compilador *stte){
+		Estado_Compilador *NE = new Estado_Compilador(stte->producRef,stte->PosAsterisco+1,stte->PosPalabra,stte->root);
+		NE->estadoChart = stte->estadoChart+1;
+		chart.push_back(NE);
 		///estado char incrementa
 		///mueve el asterisco		
 	}
@@ -306,6 +325,7 @@ class Aceptar : public Accion {
 class Unificar : public Accion {
 	bool sePuedeAplicar(Estado_Compilador *stte){
 		///si el no terminal es igual a un elemento de la oracion
+		string token = *(stte->tokens).at();
 		///si es libre de contexto, no verifica mas
 	}
 	void aplica(Estado_Compilador *stte){
