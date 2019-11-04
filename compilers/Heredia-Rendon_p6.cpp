@@ -325,7 +325,6 @@ class Aceptar : public Accion {
 class Unificar : public Accion {
 	bool sePuedeAplicar(Estado_Compilador *stte){
 		///si el no terminal es igual a un elemento de la oracion
-		string token = *(stte->tokens).at();
 		///si es libre de contexto, no verifica mas
 	}
 	void aplica(Estado_Compilador *stte){
